@@ -65,16 +65,16 @@ https://github.com/fansunjia-glitch/dsh-display-roselia
 也可以输入 `github:fansunjia-glitch/dsh-display-roselia`。为了让分享者与使用者拿到相同代码，官方建议在来源后加完整提交 SHA；以下指向本仓库 `0.2.1` 的代码：
 
 ```text
-github:fansunjia-glitch/dsh-display-roselia#5431fdc9ed3a7467f3652fa95e6fd2412b124026
+github:fansunjia-glitch/dsh-display-roselia#6b136cd5c1741339e27d8f4a0f11487b873327e0
 ```
 
 普通 Web CLI 的等价命令如下；将 `web` 替换为管理目标实例的实际 profile 名称：
 
 ```sh
-dsh plugin --profile web add github:fansunjia-glitch/dsh-display-roselia#5431fdc9ed3a7467f3652fa95e6fd2412b124026
+dsh plugin --profile web add github:fansunjia-glitch/dsh-display-roselia#6b136cd5c1741339e27d8f4a0f11487b873327e0
 ```
 
-**验证状态：官方支持上述来源形式；本插件尚未完成真实 Git 安装验收。** 当前已验证的是下文的本地目录链接安装。仓库已提交 `lib/` 构建产物，入口指向这些文件；不会把“已包含构建产物”等同于“整个安装链路已经验证”。
+**验证状态：2026-10-18 已完成真实 GitHub 安装验收。** 在全新隔离 profile 中通过官方 CLI 安装上面的仓库 HTTPS 地址，锁文件解析到提交 `6b136cd5c1741339e27d8f4a0f11487b873327e0`。DSH 自动注册组合包，真实浏览器加载主题，插件管理器显示 GitHub 来源、`0.2.1` 和组件运行中；没有额外授权安装构建脚本。验证环境为 macOS、DSH `0.2.1-rc.2`、Node.js `24.22.0`、pnpm `12.14.0`。详见 [验证记录](VERIFICATION.md)。
 
 Git 安装由 DSH 的插件管理器调用 pnpm 完成，再按 `dsh.bundle` 注册组合包。GitHub Release 和 Actions 不是这条路径的前提。仅提交 TypeScript 源码的包需要提供自包含的 `prepare` 构建；pnpm 阻止构建脚本时，用户需核对待授权包后按官方提示允许并重试。本仓库当前没有 `prepare`，保留预构建文件的分发方式。
 
@@ -144,7 +144,7 @@ npm pack --pack-destination release
 
 | 方式 | 使用方式 | 本插件状态 |
 | --- | --- | --- |
-| Git 仓库 | 分享仓库 URL 或带完整提交 SHA 的 Git spec | 已公开源码与 `lib/`；真实 Git 安装待验收 |
+| Git 仓库 | 分享仓库 URL 或带完整提交 SHA 的 Git spec | 已通过官方 CLI 安装仓库 URL，并验收真实浏览器加载 |
 | 本地目录 | 克隆、构建后，通过官方 CLI 链接安装 | 已验证 |
 | 预构建 tarball | 手动打包并分享 `.tgz`，通过官方 CLI 安装 | 已有 0.2.1 历史安装包 |
 | npm 注册表 | 发布预构建 npm 包，使用包名与版本安装 | 未采用；当前 `private: true` 阻止 npm 发布 |

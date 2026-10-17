@@ -1,6 +1,6 @@
 # 验证记录
 
-验证日期：2026-10-17。插件：Roselia 主题，`dsh-display-roselia@0.2.1`。
+界面验证日期：2026-10-17；GitHub 安装验证日期：2026-10-18。插件：Roselia 主题，`dsh-display-roselia@0.2.1`。
 
 ## 官方接入
 
@@ -27,6 +27,21 @@
 - 断电后以原官方源码 CLI、原 web profile 恢复 3080 服务，链接插件继续生效。主题设置标题为「Roselia 主题」。
 
 此前已检查明暗主题、四种场景、固定及随机成员、偏好保持、主题面板焦点返回。官方账号模块曾出现独立的 account read failed 日志，未计作本插件修复内容。
+
+## GitHub 安装验收
+
+使用官方源码 CLI、全新隔离的 `DSH_HOME` 和 `web` profile 执行以下等价命令：
+
+```sh
+dsh plugin --profile web add https://github.com/fansunjia-glitch/dsh-display-roselia
+```
+
+- macOS、DSH `0.2.1-rc.2`、Node.js `24.22.0`、pnpm `12.14.0`；官方源码目录由 macOS Seatbelt 禁止写入。
+- 安装退出码为 0，版本为 `0.2.1`；profile 依赖保存为 `github:fansunjia-glitch/dsh-display-roselia`，锁文件记录 GitHub 提交 `6b136cd5c1741339e27d8f4a0f11487b873327e0`。
+- 包位于新 profile 的 `node_modules`，未链接本地开发目录。包清单、patch 和两个 `lib/` 入口与所验收代码一致；本次安装没有要求构建授权。
+- 官方自动将主题加入 `dsh.profile.bundles`，`--dump-config` 正常显示主题配置层。
+- 启动隔离 Web 实例后，真实浏览器显示 Roselia 成员和配色；官方插件管理器显示 GitHub 来源、`0.2.1`、启用状态及一个运行中的组件，客户端主题属性和样式已生效。
+- 验收后关闭临时浏览器页和服务，并按用户要求删除本次及此前中止的 Git 安装测试目录、下载数据、日志和本次新增的主题包缓存。日常实例不受影响。
 
 ## 范围
 
