@@ -27,7 +27,7 @@ const bundle = await readFile(new URL('../lib/client.js', import.meta.url), 'utf
 const wallpaperBytes = await readFile(new URL('../assets/roselia-nocturne.png', import.meta.url))
 const PACKAGE = 'dsh-display-roselia'
 const BRAND_SLOTS = ['sidebar.brand.mark', 'sidebar.brand.name', 'conversation.hero.brand.mark']
-const REASONING_SLOT = 'conversation.input.right'
+const REASONING_SLOT = 'conversation.input.model'
 const SLOT_NAMES = [...BRAND_SLOTS, REASONING_SLOT]
 const STORAGE_KEY = 'dsh-display-roselia.preferences.v1'
 const DEFAULTS = { scene: 'stage', intensity: 75, artwork: true, member: 'random' }
@@ -42,7 +42,8 @@ function makeDirectory(overrides = {}) {
   const selections = []
   let loads = 0
   let selectionHandler = async selection => {
-    publish({ current: selection, status: 'ready', pending: null, error: null })
+    const routable = snapshot.groups.some(group => group.id === selection.provider && group.models.some(model => model.id === selection.model))
+    publish({ current: selection, routable, status: 'ready', pending: null, error: null })
     return { ok: true, value: undefined }
   }
   function publish(patch) {
@@ -66,10 +67,17 @@ function makeDirectory(overrides = {}) {
  * Contract references (read-only): ui-theme overrideTokens, and ui-renderer
  * SlotRegistry.register/inject. The bundle itself is evaluated unmodified.
  */
-function makeContext({ declared = SLOT_NAMES, directory = makeDirectory(), subagent = false, missingServices = [] } = {}) {
+function makeContext({ declared = SLOT_NAMES, directory = makeDirectory(), subagent = false, missingServices = [], nativeModel = false } = {}) {
   const effects = new Set()
   const layers = new Map()
   const entries = new Map()
+  if (nativeModel) {
+    // The shipped single-slot occupant belongs to another plugin's lifetime.
+    entries.set(REASONING_SLOT, [{
+      options: { name: REASONING_SLOT, priority: 0 },
+      component: () => React.createElement('button', { 'data-native-model-selector': '' }, 'Native model selector'),
+    }])
+  }
   const declarations = new Set(declared)
   const watchers = new Map()
   const baselineTokens = { '--dsw-alias-bg-base': 'original-base' }
@@ -159,6 +167,7 @@ function makeContext({ declared = SLOT_NAMES, directory = makeDirectory(), subag
             `slot priority collision in ${options.name}`)
           const entry = { options, component }
           list.push(entry)
+          list.sort((a, b) => (a.options.priority ?? 0) - (b.options.priority ?? 0))
           entries.set(options.name, list)
           return () => {
             const index = list.indexOf(entry)
@@ -466,7 +475,7 @@ test('native dialog controls close and restore focus, without intercepting the b
   const dialog = select(f, 'dialog')
   const close = select(f, 'button[aria-label="关闭主题设置"]')
   assert.equal(launcher.getAttribute('aria-haspopup'), 'dialog')
-  assert.equal(f.document.getElementById(dialog.getAttribute('aria-labelledby')).textContent, 'Nocturne · 夜曲')
+  assert.equal(f.document.getElementById(dialog.getAttribute('aria-labelledby')).textContent, 'Roselia 主题')
   launcher.click()
   launcher.click()
   assert.equal(dialog.open, true)
@@ -736,8 +745,8 @@ function pointer(f, node, type) {
 }
 
 async function renderReasoning(f, props = {}, { open = true } = {}) {
-  // The official input.right slot passes no owner props, only session context.
-  const container = f.renderSlot(REASONING_SLOT, { sessionId: 'test-session', ...props })
+  // The official model seat passes a locked owner flag plus session context.
+  const container = f.renderSlot(REASONING_SLOT, { sessionId: 'test-session', locked: false, ...props })
   await mutationsSettled()
   const trigger = container.querySelector('button[aria-haspopup="dialog"]')
   if (open && trigger !== null) {
@@ -775,13 +784,28 @@ test('dragging reasoning previews locally and submits a single selection when re
   f.activate()
   const container = await renderReasoning(f)
   const range = f.document.querySelector('input[aria-label="推理强度"]')
+  const popup = range.closest('[role="dialog"]')
+  const visualState = () => ({
+    progress: Number(popup.style.getPropertyValue('--effort-progress')),
+    particles: popup.querySelectorAll('.roselia-effort-particles i').length,
+  })
   pointer(f, range, 'pointerdown')
   rangeInput(f, range, 0)
+  assert.deepEqual(visualState(), { progress: 0, particles: 4 }, 'the lowest preview has a quiet four-particle effect')
+  rangeInput(f, range, 1)
+  const middle = visualState()
+  assert.equal(middle.progress, 0.5)
+  assert.ok(middle.particles > 4 && middle.particles < 16, 'an intermediate level increases the effect progressively')
   rangeInput(f, range, 2)
-  assert.equal(directory.selections.length, 0, 'dragging must not issue a series of backend changes')
+  assert.deepEqual(visualState(), { progress: 1, particles: 16 }, 'the highest preview has the strongest particle effect')
+  assert.equal(directory.selections.length, 0, 'visual previews must not issue a series of backend changes')
   pointer(f, range, 'pointerup')
   await mutationsSettled()
   assert.deepEqual(directory.selections, [{ provider: 'test-provider', model: 'test-model', reasoningEffort: 'max' }])
+  assert.deepEqual(visualState(), { progress: 1, particles: 16 }, 'release retains the committed visual strength')
+  flushSync(() => directory.publish({ current: { provider: 'test-provider', model: 'test-model', reasoningEffort: 'off' } }))
+  assert.deepEqual(visualState(), { progress: 0, particles: 4 }, 'an external effort change also updates the visual effect')
+  assert.equal(directory.selections.length, 1, 'visual synchronization does not write back another selection')
 })
 
 for (const [description, options, patch] of [
@@ -826,7 +850,7 @@ test('an in-flight shared selection disables the slider, and a failed change rep
   rangeInput(f, range, 2)
   await mutationsSettled()
   assert.equal(range.value, '1', 'a failed save returns to the actual selected effort')
-  assert.match(f.document.querySelector('[role="dialog"][aria-label="选择推理强度"] [role="status"]').textContent, /DSH|占用|另一窗口|Another|writer/i)
+  assert.match(f.document.querySelector('[role="dialog"][aria-label="选择模型与推理强度"] [role="status"]').textContent, /DSH|占用|另一窗口|Another|writer/i)
   assert.notEqual(range.getAttribute('aria-disabled'), 'true')
 })
 
@@ -997,15 +1021,16 @@ test('the reasoning slider stays hidden until requested, opens without writing, 
   const trigger = container.querySelector('button[aria-haspopup="dialog"]')
   assert.ok(trigger, 'eligible models have a compact reasoning control')
   assert.equal(trigger.getAttribute('aria-expanded'), 'false')
-  assert.match(trigger.getAttribute('aria-label'), /选择推理强度.*High/)
+  assert.match(trigger.getAttribute('aria-label'), /选择模型与推理强度.*Test model.*High/)
   assert.equal(f.document.querySelector('input[aria-label="推理强度"]'), null)
-  assert.equal(f.document.querySelector('[role="dialog"][aria-label="选择推理强度"]'), null)
+  assert.equal(f.document.querySelector('[role="dialog"][aria-label="选择模型与推理强度"]'), null)
   assert.deepEqual(directory.selections, [])
   flushSync(() => trigger.click())
   await mutationsSettled()
-  const dialog = f.document.querySelector('[role="dialog"][aria-label="选择推理强度"]')
+  const dialog = f.document.querySelector('[role="dialog"][aria-label="选择模型与推理强度"]')
   const range = f.document.querySelector('input[aria-label="推理强度"]')
   assert.ok(dialog && range)
+  assert.equal(dialog.querySelector('.roselia-effort-emblem'), null, 'the unified control has no decorative fast-mode lightning emblem')
   assert.equal(trigger.getAttribute('aria-expanded'), 'true')
   assert.ok(f.document.activeElement === range)
   assert.deepEqual(directory.selections, [], 'opening the picker never changes the actual model selection')
@@ -1091,3 +1116,225 @@ for (const missing of ['remote', 'remote.session']) {
     assert.equal(f.entries.size, 0)
   })
 }
+
+test('one official model-seat replacement shadows the native entry and unloading restores it', async t => {
+  const directory = reasoningDirectory()
+  const f = fixture(t, { directory, nativeModel: true })
+  const original = f.entries.get(REASONING_SLOT)[0]
+  f.activate()
+  const occupants = f.entries.get(REASONING_SLOT)
+  assert.equal(occupants.length, 2, 'the original occupant remains registered under its own lifetime')
+  assert.equal(occupants[0].options.priority, -100)
+  assert.ok(occupants[1] === original)
+  assert.equal(f.entries.has('conversation.input.right'), false, 'the theme adds no separate effort button')
+  assert.equal(f.entries.has('conversation.input.dock'), false, 'the theme adds no permanent slider row')
+  const container = await renderReasoning(f, {}, { open: false })
+  assert.equal(container.querySelectorAll('button').length, 1, 'model and effort share one collapsed control')
+  assert.match(container.textContent, /Test model/)
+  assert.match(container.textContent, /High/)
+  assert.equal(container.querySelector('[data-native-model-selector]'), null)
+  f.unmountSlot(container)
+  f.dispose()
+  assert.equal(f.entries.get(REASONING_SLOT).length, 1)
+  assert.ok(f.entries.get(REASONING_SLOT)[0] === original)
+  const restored = f.renderSlot(REASONING_SLOT, { sessionId: 'test-session', locked: false })
+  assert.ok(restored.querySelector('[data-native-model-selector]'), 'normal slot resolution restores the shipped selector')
+})
+
+function multiModelDirectory(patch = {}) {
+  return reasoningDirectory({
+    groups: [
+      { id: 'test-provider', name: 'Test provider', models: [
+        { id: 'test-model', name: 'Test model', reasoning: { defaultEffort: 'high', efforts: [{ id: 'off', name: 'Off' }, { id: 'high', name: 'High' }, { id: 'max', name: 'Max' }] } },
+        { id: 'plain-model', name: 'Plain model' },
+        { id: 'swift-model', name: 'Swift model', reasoning: { defaultEffort: 'off', efforts: [{ id: 'off', name: 'Off' }, { id: 'medium', name: 'Medium' }] } },
+      ] },
+      { id: 'second-provider', name: 'Second provider', models: [
+        { id: 'test-model', name: 'Other provider model', reasoning: { defaultEffort: 'low', efforts: [{ id: 'low', name: 'Low' }, { id: 'high', name: 'High' }] } },
+        { id: 'provider-default', name: 'Provider default model', reasoning: { efforts: [{ id: 'high', name: 'High' }, { id: 'max', name: 'Max' }] } },
+      ] },
+    ],
+    ...patch,
+  })
+}
+
+async function openModelList(f) {
+  const change = f.document.querySelector('button[aria-label^="切换模型"]')
+  if (change) {
+    flushSync(() => change.click())
+    await mutationsSettled()
+  }
+  const list = f.document.querySelector('[role="listbox"][aria-label="可用模型"]')
+  assert.ok(list, 'the unified popup exposes the real provider catalog')
+  return list
+}
+
+function modelOption(f, name) {
+  const option = [...f.document.querySelectorAll('[role="option"]')].find(node => node.textContent.includes(name))
+  assert.ok(option, `missing model option ${name}`)
+  return option
+}
+
+async function chooseModel(f, name) {
+  await openModelList(f)
+  const option = modelOption(f, name)
+  flushSync(() => option.click())
+  await mutationsSettled()
+}
+
+test('the unified picker lists provider groups and applies the destination model default using its full route', async t => {
+  const directory = multiModelDirectory({ current: { provider: 'test-provider', model: 'test-model', reasoningEffort: 'max' } })
+  const f = fixture(t, { directory })
+  f.activate()
+  const container = await renderReasoning(f)
+  const list = await openModelList(f)
+  assert.match(list.textContent, /Test provider/)
+  assert.match(list.textContent, /Second provider/)
+  assert.equal(f.document.querySelectorAll('[role="option"]').length, 5)
+  assert.equal(modelOption(f, 'Test model').getAttribute('aria-selected'), 'true')
+  await chooseModel(f, 'Other provider model')
+  assert.deepEqual(directory.selections, [{ provider: 'second-provider', model: 'test-model', reasoningEffort: 'low' }],
+    'identical model IDs on different providers must remain distinct routes')
+  assert.match(container.textContent, /Other provider model/)
+  assert.match(container.textContent, /Low/)
+  assert.equal(f.document.querySelector('input[aria-label="推理强度"]').getAttribute('aria-valuetext'), 'Low')
+})
+
+test('selecting the same model keeps a valid custom effort and does not issue a redundant request', async t => {
+  const directory = multiModelDirectory({ current: { provider: 'test-provider', model: 'test-model', reasoningEffort: 'max' } })
+  const f = fixture(t, { directory })
+  f.activate()
+  const container = await renderReasoning(f)
+  await chooseModel(f, 'Test model')
+  assert.deepEqual(directory.selections, [])
+  assert.match(container.textContent, /Max/)
+})
+
+test('models without reasoning still provide the unified model chooser and never inherit another model’s effort', async t => {
+  const directory = multiModelDirectory({ current: { provider: 'test-provider', model: 'plain-model' } })
+  const f = fixture(t, { directory })
+  f.activate()
+  const container = await renderReasoning(f)
+  assert.match(container.textContent, /Plain model/)
+  assert.equal(f.document.querySelector('input[aria-label="推理强度"]'), null)
+  await chooseModel(f, 'Swift model')
+  assert.deepEqual(directory.selections.at(-1), { provider: 'test-provider', model: 'swift-model', reasoningEffort: 'off' })
+  assert.ok(f.document.querySelector('input[aria-label="推理强度"]'))
+  await chooseModel(f, 'Plain model')
+  assert.deepEqual(directory.selections.at(-1), { provider: 'test-provider', model: 'plain-model' })
+  assert.equal(f.document.querySelector('input[aria-label="推理强度"]'), null)
+  await chooseModel(f, 'Provider default model')
+  assert.deepEqual(directory.selections.at(-1), { provider: 'second-provider', model: 'provider-default' })
+})
+
+test('a rejected model switch preserves the saved choice and exposes a retryable error in the open picker', async t => {
+  const directory = multiModelDirectory()
+  directory.setSelectionHandler(async () => ({ ok: false, error: { code: 'model/unavailable', message: 'This model is unavailable' } }))
+  const f = fixture(t, { directory })
+  f.activate()
+  const container = await renderReasoning(f)
+  await chooseModel(f, 'Swift model')
+  assert.deepEqual(directory.selections, [{ provider: 'test-provider', model: 'swift-model', reasoningEffort: 'off' }])
+  assert.match(container.textContent, /Test model/)
+  assert.doesNotMatch(container.textContent, /Swift model/)
+  const dialog = f.document.querySelector('[role="dialog"][aria-label="选择模型与推理强度"]')
+  assert.ok(dialog, 'a failure leaves the picker available for retry')
+  assert.match(dialog.querySelector('[role="status"]').textContent, /unavailable/)
+  assert.equal(modelOption(f, 'Test model').getAttribute('aria-selected'), 'true')
+})
+
+test('the official locked owner state prevents opening the combined model and effort control', async t => {
+  const directory = multiModelDirectory()
+  const f = fixture(t, { directory })
+  f.activate()
+  const container = await renderReasoning(f, { locked: true }, { open: false })
+  const trigger = container.querySelector('button[aria-haspopup="dialog"]')
+  assert.ok(trigger)
+  assert.ok(trigger.disabled || trigger.getAttribute('aria-disabled') === 'true')
+  flushSync(() => trigger.click())
+  await mutationsSettled()
+  assert.equal(f.document.querySelector('[role="dialog"][aria-label="选择模型与推理强度"]'), null)
+  assert.deepEqual(directory.selections, [])
+})
+
+test('the model list has no search field and keyboard navigation selects a route directly', async t => {
+  const directory = multiModelDirectory({ current: { provider: 'test-provider', model: 'swift-model', reasoningEffort: 'off' } })
+  const f = fixture(t, { directory })
+  f.activate()
+  await renderReasoning(f)
+  await openModelList(f)
+  assert.equal(f.document.querySelector('input[type="search"], input[aria-label="搜索模型"]'), null)
+  assert.equal(f.document.querySelectorAll('[role="option"]').length, 5, 'the complete catalog is directly available')
+  assert.ok(f.document.activeElement === modelOption(f, 'Swift model'), 'the pane starts on the selected model')
+  for (const [key, name] of [
+    ['ArrowDown', 'Other provider model'],
+    ['ArrowUp', 'Swift model'],
+    ['Home', 'Test model'],
+    ['End', 'Provider default model'],
+  ]) {
+    flushSync(() => f.document.activeElement.dispatchEvent(new f.window.KeyboardEvent('keydown', { key, bubbles: true, cancelable: true })))
+    assert.ok(f.document.activeElement === modelOption(f, name), `${key} moves focus to ${name}`)
+  }
+  assert.deepEqual(directory.selections, [], 'navigation alone never changes the model')
+  const target = f.document.activeElement
+  flushSync(() => {
+    const uncancelled = target.dispatchEvent(new f.window.KeyboardEvent('keydown', { key: 'Enter', bubbles: true, cancelable: true }))
+    // jsdom does not synthesize native button activation from keyboard events.
+    // Model the browser's default click only when the event was not consumed.
+    if (uncancelled) target.click()
+  })
+  await mutationsSettled()
+  assert.deepEqual(directory.selections, [{ provider: 'second-provider', model: 'provider-default' }])
+})
+
+test('Escape from the model list closes the combined picker and restores the single trigger', async t => {
+  const directory = multiModelDirectory()
+  const f = fixture(t, { directory })
+  f.activate()
+  const container = await renderReasoning(f)
+  const trigger = container.querySelector('button[aria-haspopup="dialog"]')
+  await openModelList(f)
+  const current = modelOption(f, 'Test model')
+  assert.ok(f.document.activeElement === current)
+  flushSync(() => current.dispatchEvent(new f.window.KeyboardEvent('keydown', { key: 'Escape', bubbles: true, cancelable: true })))
+  await mutationsSettled()
+  assert.equal(f.document.querySelector('[role="dialog"][aria-label="选择模型与推理强度"]'), null)
+  assert.equal(trigger.getAttribute('aria-expanded'), 'false')
+  assert.ok(f.document.activeElement === trigger)
+  assert.deepEqual(directory.selections, [])
+})
+
+test('an unavailable saved model retains a usable chooser for selecting an available route', async t => {
+  const directory = multiModelDirectory({ current: { provider: 'removed-provider', model: 'removed-model', reasoningEffort: 'max' }, routable: false })
+  const f = fixture(t, { directory })
+  f.activate()
+  const container = await renderReasoning(f)
+  assert.ok(container.querySelector('button[aria-haspopup="dialog"]'))
+  assert.doesNotMatch(container.textContent, /removed-provider|removed-model|Max/)
+  assert.equal(f.document.querySelector('input[aria-label="推理强度"]'), null)
+  assert.ok(f.document.activeElement === modelOption(f, 'Test model'), 'an unavailable model starts on the first available choice')
+  await chooseModel(f, 'Swift model')
+  assert.deepEqual(directory.selections, [{ provider: 'test-provider', model: 'swift-model', reasoningEffort: 'off' }])
+  assert.match(container.textContent, /Swift model/)
+})
+
+test('Tab and Shift+Tab keep keyboard focus inside both panes of the combined picker', async t => {
+  const directory = multiModelDirectory()
+  const f = fixture(t, { directory })
+  f.activate()
+  await renderReasoning(f)
+  for (const pane of ['effort', 'models']) {
+    if (pane === 'models') await openModelList(f)
+    const dialog = select(f, '[role="dialog"][aria-label="选择模型与推理强度"]')
+    const controls = [...dialog.querySelectorAll('button:not([disabled]), input:not([disabled])')].filter(node => node.tabIndex >= 0)
+    assert.ok(controls.length >= 2)
+    const first = controls[0]
+    const last = controls.at(-1)
+    last.focus()
+    flushSync(() => last.dispatchEvent(new f.window.KeyboardEvent('keydown', { key: 'Tab', bubbles: true, cancelable: true })))
+    assert.ok(f.document.activeElement === first, `${pane}: Tab from the final control wraps to the first`)
+    flushSync(() => first.dispatchEvent(new f.window.KeyboardEvent('keydown', { key: 'Tab', shiftKey: true, bubbles: true, cancelable: true })))
+    assert.ok(f.document.activeElement === last, `${pane}: Shift+Tab from the first control wraps to the final one`)
+  }
+  assert.deepEqual(directory.selections, [], 'focus navigation never submits a model choice')
+})

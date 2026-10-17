@@ -1,15 +1,17 @@
-# Roselia · Nocturne / 夜曲
+# Roselia 主题
 
-为 **BanG Dream! Roselia** 制作的 DSH 全局界面主题。**0.2.0 默认以官方成员立绘为主角**：每次进入首页，随机遇见五位成员之一。深色采用午夜蓝、紫水晶与银白，浅色采用淡紫与月光白；保留官方标志与演出主视觉，并增加与模型菜单同步、点击后展开的推理强度浮层。
+为 **BanG Dream! Roselia** 制作的 DSH 全局界面主题。**默认以官方成员立绘为主角**：每次进入首页，随机遇见五位成员之一。深色采用午夜蓝、紫水晶与银白，浅色采用淡紫与月光白；保留官方标志与演出主视觉，模型选择与推理强度共用一个按需展开的入口。
 
 ![Roselia 成员舞台](screenshots/member-stage-dark.jpg)
 
 ![按需展开的推理强度浮层](screenshots/reasoning-popover.jpg)
 
+![无搜索框的模型列表](screenshots/model-picker.jpg)
+
 ## 使用效果
 
 - 全局语义配色覆盖侧栏、对话区、输入框、代码块及交互状态，明暗模式跟随 DSH。
-- 右下角 **ROSELIA / R** 打开主题面板：成员舞台、夜曲、演出、纯净四种场景；随机成员、全员或固定成员；氛围强度；成员装饰开关。
+- 右下角 **ROSELIA / R** 打开主题面板：成员舞台、月夜、演出、纯净四种场景；随机成员、全员或固定成员；氛围强度；成员装饰开关。
 - 默认是成员舞台、随机相遇、75% 强度。每次进入首页或切到新的空白会话时重新抽取，不连续重复；普通重渲染和调节强度不会换人。固定成员模式保持选择。
 - 偏好保存在当前浏览器的本地存储；上一位随机成员保存在当前标签页的 sessionStorage，刷新后也避免连续重复。旧版完全默认的设置会迁移为新设计，明确选过的固定成员或其他场景保留。
 - 对话中的装饰自动减淡；背景不拦截点击。纯净模式只保留配色与品牌标志。
@@ -18,13 +20,17 @@
 
 这是个人非官方主题。素材出处见 [ATTRIBUTION.md](ATTRIBUTION.md)。
 
-## 推理强度滑动条
+## 模型与推理强度
 
-检查当前 DSH 的官方 `ui-model-selection` 实现后，确认它提供选项菜单，没有内置滑动模式或可开启的 slider 配置。本插件通过官方 **`conversation.input.right` 插槽**增加紧凑入口，点击“推理强度”才展开滑动浮层，并使用 **`ctx.modelDirectories`** 与原模型菜单共享目录、选择状态和提交接口。
+模型选择与推理强度合并到官方 **`conversation.input.model` 单一插槽**，以 `priority: -100` 覆盖默认入口，并使用 **`ctx.modelDirectories`** 共享官方目录、选择状态和提交接口。停用插件后，插槽自动恢复原生模型入口；不需要修改官方源码。
 
-浮层参考 Codex 的推理强度交互：顶部显示当前档位和模型名，底部采用宽幅蓝紫渐变轨道、流动光点与白色圆形滑块。关闭时不占据主页或输入框上方空间。拖动时预览，释放时提交；方向键、Home/End 也可操作；Escape 或点击外部关闭浮层。恢复按钮回到当前模型声明的默认档位。它仅显示当前模型由适配器公布的档位，不构造不支持的中间值。选择从下一次请求生效，原模型菜单继续可用。
+点击统一入口展开紧凑浮层，顶部显示当前推理档位，并通过模型按钮进入无搜索框的分组列表，当前模型右侧显示勾号；底部采用渐变轨道、流动光点与白色圆形滑块。浮层按参考比例设置为 256 × 98px，轨道 24px、圆形滑块 28px，不显示闪电图标。关闭时不占据主页或输入框上方空间。拖动时预览，释放时提交；方向键、Home/End 也可操作；Escape 或点击外部关闭浮层。恢复按钮回到当前模型声明的默认档位。它仅显示适配器公布的档位，不构造不支持的中间值，选择从下一次请求生效。
 
-没有推理元数据、不可路由或已寻址的子智能体会话不显示滑条。等待保存时阻止重复提交，失败时显示原因并保留官方真实选择；支持减少动态效果和系统强制颜色。滑条不会自动改变当前推理强度，也不会发起模型请求。
+没有推理元数据时保留模型选择入口，只隐藏滑条；当前模型不可路由时仍可改选可用模型。已寻址的子智能体会话不显示选择入口。等待保存时阻止重复提交，失败时显示原因并保留官方真实选择；支持减少动态效果和系统强制颜色。滑条不会自动改变当前推理强度，也不会发起模型请求。
+
+视觉随当前模型的相对档位变化：低档位偏冷蓝，粒子较少且缓慢；高档位转为紫色，粒子、辉光和流光逐渐增强。粒子数量从最低档的 4 颗递增至最高档的 16 颗。拖动时实时预览；开启系统减少动态效果时关闭粒子和流光动画。
+
+`0.2.1` 已通过类型检查、55 项测试及真实浏览器验收，详见 [验证记录](VERIFICATION.md)。
 
 ## 兼容范围
 
@@ -48,7 +54,7 @@ npm run preview -- --dsh /path/to/dsh --port 0
 
 ## 安装进自己的 DSH
 
-从 [GitHub Releases](https://github.com/fansunjia-glitch/dsh-display-roselia/releases) 下载预构建的 `dsh-display-roselia-0.2.0.tgz`，或按上面的命令克隆并构建源码。
+从 [GitHub Releases](https://github.com/fansunjia-glitch/dsh-display-roselia/releases) 下载预构建的 `dsh-display-roselia-0.2.1.tgz`，或按上面的命令克隆并构建源码。
 
 对于普通 CLI / Web / PWA，使用管理该实例的 `dsh` CLI，将下面的 `你的profile名称` 替换为实际名称：
 
@@ -64,7 +70,7 @@ dsh --profile 你的profile名称
 推荐直接安装 Release 中预构建的 tarball，无需授权运行安装构建脚本：
 
 ```sh
-dsh plugin --profile 你的profile名称 add /absolute/path/to/dsh-display-roselia-0.2.0.tgz
+dsh plugin --profile 你的profile名称 add /absolute/path/to/dsh-display-roselia-0.2.1.tgz
 ```
 
 源码开发请使用克隆后本地目录链接的流程。退出 DSH 后移除：
@@ -84,7 +90,7 @@ dsh plugin --profile 你的profile名称 remove dsh-display-roselia
 | `src/client/artwork.ts` | 官方图片与成员索引 |
 | `src/client/controls.ts` | 设置面板、键盘操作与本地偏好 |
 | `src/client/member-stage.ts` | 官方主页插槽生命周期中的随机成员与防重复逻辑 |
-| `src/client/reasoning.tsx` | 官方模型目录上的离散滑动控件与提交状态 |
+| `src/client/reasoning.tsx` | 官方模型目录上的统一模型入口、离散滑动控件与提交状态 |
 | `src/client/reasoning.css` | 浮层、流光轨道、响应式及无障碍视觉 |
 | `src/client/index.ts` | `theme` / `slots` 接入及生命周期清理 |
 | `scripts/build.mjs` | 独立构建 Host ESM 与 DSH 浏览器 factory |

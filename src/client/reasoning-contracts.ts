@@ -17,8 +17,10 @@ export interface ModelDirectoryState {
   routable: boolean | null
   groups: readonly {
     id: string
+    name?: string
     models: readonly { id: string; name: string; reasoning?: ReasoningMetadata }[]
   }[]
+  failures?: readonly { id: string; name: string; message: string }[]
   status: 'idle' | 'loading' | 'ready' | 'selecting' | 'error'
   pending: ModelSelection | null
   error: string | null
@@ -39,8 +41,9 @@ export interface ReasoningInjected {
 }
 
 export interface ReasoningSlotProps extends ReasoningInjected {
-  /** Public session-standard identity; conversation.input.right has no owner props. */
+  /** Public model-seat owner plus session-standard identity. */
   sessionId: string
+  locked: boolean
 }
 
 interface ReasoningScope {
@@ -56,8 +59,7 @@ interface ReasoningScope {
     inject(name: string, setup: () => (() => void)): unknown
     register(options: {
       name: string
-      id: string
-      order: number
+      priority: number
       inject(sessionId: string): ReasoningInjected
     }, component: ComponentType<ReasoningSlotProps>): () => void
   }

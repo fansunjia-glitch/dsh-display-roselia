@@ -1,43 +1,43 @@
 # 验证记录
 
-验证日期：2026-10-17。插件：`dsh-display-roselia@0.2.0`。
+验证日期：2026-10-17。插件：Roselia 主题，`dsh-display-roselia@0.2.1`。
 
-## 环境与官方接入
+## 官方接入
 
-- DSH `0.2.1-rc.2`，只读参考提交 `687f282e86`。
-- macOS、Node.js `24.22.0`、真实 DSH Web Client / Chromium。
-- 使用官方 `dsh plugin --profile web add <本地插件目录>` 链接安装；CLI 自动维护 profile 依赖与 bundle 层。
-- 官方源码 CLI 的安装和启动进程受 macOS Seatbelt 保护，拒绝写入官方仓库。安装后官方仓库工作区仍干净。
-- 主题使用 `theme.overrideTokens`、品牌插槽；推理浮层使用 `conversation.input.right` 与 `modelDirectories`。没有修改或拦截官方模型菜单。
+- DSH `0.2.1-rc.2`，只读参考提交 `687f282e86`；macOS、Node.js `24.22.0`、真实 Web Client / Chromium。
+- 通过官方 `dsh plugin --profile web add <本地插件目录>` 建立的链接安装加载，profile 与 bundle 由官方 CLI 管理。
+- 安装和服务启动受 macOS Seatbelt 保护，禁止写入官方源码目录；本轮只构建独立插件。
+- 主题使用 `theme.overrideTokens` 和品牌插槽。模型入口通过 `conversation.input.model` 的 `priority: -100` 覆盖，读取和提交仍使用官方 `modelDirectories`；不重复声明原生入口的 children，停用后恢复原生入口。
 
 ## 自动检查
 
-`npm run typecheck` 通过；最终 `npm test` **45 / 45 通过**。覆盖主题生命周期、偏好和随机成员、官方插槽、浮层按需显示、Escape/外部关闭、拖动单次提交、键盘连续调整、双向同步、默认档位、失败与过期手势、忙碌门控及卸载。
+`npm run typecheck` 与 `npm test` 均通过，**55 / 55** 项测试覆盖主题生命周期、偏好与随机成员、单入口覆盖与卸载恢复、无推理模型、provider 分组、目标模型默认档位、失败与过期手势、锁定状态、无搜索列表的键盘导航、Tab 焦点循环、Escape 和外部关闭。
 
-新增冷启动回归：严格验证调用 `directoryFor()` 的范围已声明 `modelDirectories`、`sessions`、`remote`、`remote.session`；连接服务缺失时推理入口延迟注册，主题仍可使用。
+拖动回归确认粒子数量随预览从 4 颗增至 16 颗，拖动过程中不提交，释放时只提交一次；官方状态变化会同步更新视觉。冷启动验证 `modelDirectories`、`sessions`、`remote`、`remote.session` 声明完整。
 
-构建同时验证：仅注册一个符合 DSH 协议的 factory；加载时不提前操作 DOM；输入文件都属于插件目录；运行时 external 受白名单约束。CSS source map 使用插件相对路径，不携带开发机器路径。
+构建校验单个 DSH factory、激活前不操作 DOM、输入均位于插件目录及 runtime external 白名单。CSS source map 不包含开发机器的绝对路径。
 
 ## 页面验收
 
-已验证的主题行为：深浅色跟随 DSH、四种场景、固定成员与随机相遇、刷新保持偏好、纯净模式、主题面板键盘关闭与焦点返回。随机模式在重新进入主页时更换成员，连续两次不会重复；普通渲染不换人。
+- 输入框底部只有「模型名 + 推理强度」入口，关闭时没有滑条；点击直接显示 256 × 98px 浮层，轨道 24px、滑块 28px，无闪电图标。
+- 点击浮层模型名进入无搜索框的列表；显示真实 provider、模型名和选中勾号。鼠标切换及 Home / End / Enter 操作正常，选择可调模型后回到滑条。
+- 实际切换过 DeepSeek-V4-Pro 与 DeepSeek-V4.1-Flash；连续键盘调整会更新共享选择，焦点可继续操作。最终恢复验收开始时的 DeepSeek-V4-Pro / Max。
+- Low 显示冷蓝渐变、8 颗粒子、约 5.67 秒流动周期；Max 显示紫色渐变、16 颗粒子、3 秒周期和更强辉光。粒子数量按当前模型的相对档位计算，不改变适配器公布的档位。
+- 桌面和 390 × 844 窄屏均检查，无横向溢出，浮层保持在视口内；测试后已移除视口覆盖。
+- 断电后以原官方源码 CLI、原 web profile 恢复 3080 服务，链接插件继续生效。主题设置标题为「Roselia 主题」。
 
-桌面 `1200 × 900` 与窄窗口 `390 × 844` 已验收：默认不渲染滑条；点击后展开圆角浮层；蓝紫流光、白色正圆滑块显示正确。End、连续方向键及真实鼠标拖动会更新官方菜单，焦点连续可用；Escape 和外部点击关闭。窄屏浮层位于视口 12–378px 内，无横向溢出。测试后恢复原档位。
+此前已检查明暗主题、四种场景、固定及随机成员、偏好保持、主题面板焦点返回。官方账号模块曾出现独立的 account read failed 日志，未计作本插件修复内容。
 
-全新页面复核后，官方模型目录首次加载的注入错误不再出现；DSH 官方账号状态模块出现过独立的 account read failed 日志，控件仍可加载与选择。未将该账号模块问题计作已修复。官方插件管理器显示 0.2.0、已启用且组件运行中。响应式测试覆盖已清除。
+## 范围
 
-## 交付与范围
+未发送模型请求或修改模型凭据；Electron Desktop、其他 DSH 版本和真实长对话未实测。模型目录重试使用官方公开 load 接口，其缓存与 provider 局部失败刷新仍服从官方生命周期。
 
-源码、构建产物、素材出处和截图随交付包提供。运行日志、登录信息、profile 数据与开发依赖均排除。素材离线嵌入；日常显示不请求图片网站。
-
-未发送模型请求、未修改模型凭据。Electron Desktop、其他 DSH 版本与真实长对话未实测。停用、卸载、热重载和 Blob URL 释放由自动化生命周期测试覆盖。
-
-0.1.0 还验证过 macOS 隔离预览进程启动、退出清理及大型背景图片的 Blob URL 回归。
+运行日志、登录信息、profile 数据与开发依赖不打包、不提交。素材随客户端离线提供。
 
 ## 截图
 
-- [默认随机成员舞台](screenshots/member-stage-dark.jpg)
-- [推理强度浮层](screenshots/reasoning-popover.jpg)
+- [高档位推理浮层](screenshots/reasoning-popover.jpg)
+- [低档位推理浮层](screenshots/reasoning-low.jpg)
+- [无搜索模型列表](screenshots/model-picker.jpg)
 - [窄窗口](screenshots/member-stage-narrow.jpg)
-- [浅色主题](screenshots/nocturne-light.jpg)（0.1.0）
-- [主题设置面板](screenshots/theme-settings.jpg)（0.1.0）
+- [随机成员舞台](screenshots/member-stage-dark.jpg)

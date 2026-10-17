@@ -1,65 +1,94 @@
-/* A compact official composer control; only its open chooser owns a slider. */
+/* One model seat, with the chooser shown only while its button is open. */
 .roselia-effort-trigger {
-  display: inline-flex; align-items: center; gap: 5px; flex: none;
-  min-height: 30px; padding: 3px 8px; border: 1px solid transparent; border-radius: 9px;
-  color: var(--roselia-muted); background: transparent; cursor: pointer;
-  font: 11px/1.25 var(--dsw-font-family, system-ui, sans-serif); white-space: nowrap;
-  transition: color .18s, background .18s;
+  display: inline-flex; align-items: center; gap: 5px; min-width: 0;
+  max-width: min(360px, 45cqw); height: 28px; padding: 0 5px 0 8px;
+  border: 0; border-radius: var(--dsw-radius-sm, 8px);
+  color: var(--roselia-ink); background: transparent; cursor: pointer;
+  font: 400 13px/20px var(--dsw-font-family, system-ui, sans-serif); white-space: nowrap;
+  transition: color .16s, background .16s;
 }
-.roselia-effort-trigger svg { width: 15px; height: 15px; color: var(--roselia-accent); }
-.roselia-effort-trigger-value { color: var(--roselia-accent); font-weight: 500; }
-.roselia-effort-trigger:hover, .roselia-effort-trigger[aria-expanded='true'] { background: color-mix(in srgb, var(--roselia-accent) 12%, transparent); color: var(--roselia-ink); }
+.roselia-effort-trigger-label { min-width: 0; overflow: hidden; text-overflow: ellipsis; }
+.roselia-effort-trigger-value { flex: none; color: var(--roselia-accent); }
+.roselia-effort-trigger svg { flex: none; width: 12px; height: 12px; color: var(--roselia-muted); transition: transform .18s ease; }
+.roselia-effort-trigger[aria-expanded='true'] .roselia-effort-chevron { transform: rotate(180deg); }
+.roselia-effort-trigger:hover, .roselia-effort-trigger[aria-expanded='true'] { background: color-mix(in srgb, var(--roselia-accent) 10%, transparent); }
 .roselia-effort-trigger:focus-visible { outline: 2px solid var(--roselia-accent); outline-offset: 2px; }
+.roselia-effort-trigger:disabled { opacity: .5; cursor: default; background: transparent; }
 .roselia-effort-popover {
-  position: fixed; inset: auto; z-index: 1000; margin: 0; box-sizing: border-box;
-  width: min(380px, calc(100vw - 24px)); max-height: calc(100dvh - 24px); overflow: auto;
-  padding: 19px 23px 20px; border: 1px solid #ffffff16; border-radius: 24px; corner-shape: round;
-  color: #e9e8f4; background: #242330;
-  box-shadow: 0 12px 48px #0a071b66, 0 2px 8px #0002;
-  font: 12px/1.35 var(--dsw-font-family, system-ui, sans-serif);
-  animation: roselia-effort-reveal .16s ease-out;
+  --effort-thumb-size: 28px;
+  --effort-color: hsl(calc(216 + var(--effort-progress) * 62) 58% 46%);
+  position: fixed; inset: auto; z-index: 1100; margin: 0; box-sizing: border-box;
+  width: min(256px, calc(100vw - 24px)); max-height: calc(100dvh - 24px); overflow: auto;
+  padding: 10px 12px; border: 1px solid var(--roselia-line); border-radius: 16px; corner-shape: round;
+  color: var(--roselia-ink); background: var(--roselia-surface);
+  box-shadow: 0 8px 28px #0a071b2b, 0 2px 6px #00000014, inset 0 1px 0 #ffffff05;
+  font: 12px/1.4 var(--dsw-font-family, system-ui, sans-serif);
+  animation: roselia-effort-reveal .16s cubic-bezier(.2,.8,.2,1);
+  scrollbar-width: thin; scrollbar-color: var(--roselia-line) transparent;
 }
 .roselia-effort-popover::backdrop { background: transparent; }
-.roselia-effort-heading { display: grid; grid-template-columns: 36px minmax(0, 1fr) 36px; align-items: center; gap: 8px; min-height: 48px; }
-.roselia-effort-emblem { display: grid; place-items: center; color: #e2e2ec; }
-.roselia-effort-emblem svg { width: 28px; height: 28px; }
-.roselia-effort-caption { min-width: 0; text-align: center; }
-.roselia-effort-value { font-size: 23px; font-weight: 600; line-height: 1.2; color: hsl(var(--effort-hue) 85% 76%); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; transition: color .25s ease; }
-.roselia-effort-model { margin-top: 3px; color: #e1dfe9; font-size: 13px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.roselia-effort-reset { display: grid; place-items: center; width: 34px; height: 34px; padding: 6px; border: 0; border-radius: 10px; color: #dfdce9; background: transparent; cursor: pointer; }
-.roselia-effort-reset svg { width: 21px; height: 21px; }
-.roselia-effort-reset:hover { background: #ffffff0d; }
-.roselia-effort-reset:focus-visible { outline: 2px solid #d9bbff; outline-offset: 1px; }
+body[data-ds-dark-theme] .roselia-effort-popover { --effort-color: hsl(calc(216 + var(--effort-progress) * 62) 86% 77%); }
+.roselia-effort-popover button, .roselia-effort-popover input { font-family: inherit; }
+.roselia-effort-heading { display: grid; grid-template-columns: 26px minmax(0, 1fr) 26px; align-items: center; gap: 6px; min-height: 40px; }
+.roselia-effort-caption { grid-column: 2; grid-row: 1; min-width: 0; text-align: center; }
+.roselia-effort-value { font-size: 14px; font-weight: 500; line-height: 18px; color: var(--effort-color); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; transition: color .25s ease; }
+.roselia-effort-model { margin-top: 1px; color: var(--roselia-muted); font-size: 12px; line-height: 18px; }
+.roselia-model-switch { display: inline-flex; align-items: center; justify-content: center; gap: 3px; max-width: 100%; padding: 1px 4px; border: 0; border-radius: 5px; background: transparent; cursor: pointer; }
+.roselia-model-switch span { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.roselia-model-switch svg { flex: none; width: 11px; height: 11px; }
+.roselia-model-switch:hover { color: var(--roselia-ink); background: color-mix(in srgb, var(--roselia-accent) 10%, transparent); }
+.roselia-effort-reset, .roselia-model-back { display: grid; place-items: center; width: 26px; height: 26px; padding: 4px; border: 0; border-radius: 7px; color: var(--roselia-muted); background: transparent; cursor: pointer; }
+.roselia-effort-reset, .roselia-effort-reset-placeholder { grid-column: 3; grid-row: 1; align-self: start; }
+.roselia-effort-reset svg, .roselia-model-back svg { width: 16px; height: 16px; }
+.roselia-model-back { font-size: 22px; line-height: 18px; }
+.roselia-effort-reset:hover, .roselia-model-back:hover { color: var(--roselia-ink); background: color-mix(in srgb, var(--roselia-accent) 10%, transparent); }
+.roselia-effort-popover button:focus-visible { outline: 2px solid var(--roselia-accent); outline-offset: 2px; }
 .roselia-effort-reset[aria-disabled='true'] { opacity: .4; cursor: default; }
-.roselia-effort-scale { position: relative; height: 46px; margin-top: 19px; }
-.roselia-effort-track { position: absolute; inset: 5px 0; height: 36px; border-radius: 999px; corner-shape: round; background: #494956; box-shadow: inset 0 1px 2px #0002; }
-.roselia-effort-fill { position: absolute; inset: 0 auto 0 0; width: calc(23px + var(--effort-progress) * (100% - 46px)); border-radius: inherit; corner-shape: round; background: radial-gradient(ellipse at 68% 50%, #e4c9ff55, transparent 65%), linear-gradient(90deg, #5865e8 0%, #c39aff 55%, #7950cc 100%); filter: saturate(calc(.8 + var(--effort-progress) * .3)); transition: width .24s cubic-bezier(.2,.8,.2,1), filter .25s; }
-.roselia-effort-thumb { position: absolute; z-index: 2; top: 50%; left: calc(23px + var(--effort-progress) * (100% - 46px)); width: 46px; height: 46px; box-sizing: border-box; border: 1px solid #ffffffee; border-radius: 50%; corner-shape: round; background: #fff; box-shadow: 0 1px 5px #1710243b, 0 0 14px #dfceff14; transform: translate(-50%, -50%); transition: left .24s cubic-bezier(.2,.8,.2,1), box-shadow .2s; }
+.roselia-effort-scale { position: relative; height: var(--effort-thumb-size); margin-top: 8px; }
+.roselia-effort-track { position: absolute; inset: 2px 0; height: 24px; border-radius: 999px; corner-shape: round; background: color-mix(in srgb, var(--roselia-muted) 20%, var(--roselia-paper)); box-shadow: inset 0 1px 2px #0000000d; }
+.roselia-effort-fill { position: absolute; inset: 0 auto 0 0; width: calc(var(--effort-thumb-size) / 2 + var(--effort-progress) * (100% - var(--effort-thumb-size))); overflow: hidden; border-radius: inherit; corner-shape: round; background: radial-gradient(ellipse at 65% 50%, hsl(280 100% 92% / calc(.12 + var(--effort-progress) * .28)), transparent 65%), linear-gradient(90deg, hsl(calc(210 + var(--effort-progress) * 28) 74% 62%) 0%, hsl(calc(221 + var(--effort-progress) * 49) 78% 75%) 56%, hsl(calc(239 + var(--effort-progress) * 39) 57% 56%) 100%); filter: saturate(calc(.8 + var(--effort-progress) * .3)); box-shadow: 0 0 calc(var(--effort-progress) * 12px) hsl(265 80% 70% / calc(var(--effort-progress) * .2)); transition: width .24s cubic-bezier(.2,.8,.2,1), filter .25s, box-shadow .25s; }
+.roselia-effort-fill::before { content: ''; position: absolute; inset: 0; background: linear-gradient(105deg, transparent 30%, #ffffff60 50%, transparent 70%); opacity: calc(var(--effort-progress) * var(--effort-progress) * .38); animation: roselia-effort-shimmer calc(8s - var(--effort-progress) * 4s) ease-in-out infinite; }
+.roselia-effort-thumb { position: absolute; z-index: 2; top: 50%; left: calc(var(--effort-thumb-size) / 2 + var(--effort-progress) * (100% - var(--effort-thumb-size))); width: var(--effort-thumb-size); height: var(--effort-thumb-size); box-sizing: border-box; border: 1px solid #ffffffee; border-radius: 50%; corner-shape: round; background: #fff; box-shadow: 0 1px 4px #17102433, 0 0 12px #dfceff10; transform: translate(-50%, -50%); transition: left .24s cubic-bezier(.2,.8,.2,1), box-shadow .2s; }
 .roselia-effort-particles { position: absolute; inset: 0; overflow: hidden; border-radius: inherit; corner-shape: round; }
-.roselia-effort-particles i { position: absolute; left: calc(var(--particle-index) * 8.4%); width: 2px; height: 2px; border-radius: 50%; corner-shape: round; background: #f5eaff; box-shadow: 0 0 5px #f1e3ff88; animation: roselia-effort-stream calc(4.8s - var(--effort-progress) * 1.2s) linear infinite; animation-delay: calc(var(--particle-index) * -.39s); }
-.roselia-effort-particles i:nth-child(3n) { width: 3px; height: 3px; }
-.roselia-effort-particles i:nth-child(3n + 1) { width: 1.5px; height: 1.5px; }
-.roselia-effort-range { position: absolute; z-index: 3; inset: 0; width: 100%; height: 46px; padding: 0; margin: 0; opacity: 0; appearance: none; background: transparent; cursor: ew-resize; touch-action: pan-y; }
-.roselia-effort-range::-webkit-slider-thumb { appearance: none; width: 46px; height: 46px; border-radius: 50%; corner-shape: round; }
-.roselia-effort-range::-moz-range-thumb { width: 46px; height: 46px; border: 0; border-radius: 50%; corner-shape: round; }
-.roselia-effort-scale:has(.roselia-effort-range:focus-visible) .roselia-effort-thumb { outline: 2px solid #d6bbff; outline-offset: 4px; }
-.roselia-effort-scale:has(.roselia-effort-range:hover) .roselia-effort-thumb { box-shadow: 0 1px 5px #1710243b, 0 0 18px #dfceff60; }
+.roselia-effort-particles i { position: absolute; width: calc(1px + var(--effort-progress) * .8px); height: calc(1px + var(--effort-progress) * .8px); border-radius: 50%; corner-shape: round; background: hsl(calc(215 + var(--effort-progress) * 65) 100% 96%); box-shadow: 0 0 calc(2px + var(--effort-progress) * 5px) hsl(270 100% 90% / calc(.25 + var(--effort-progress) * .5)); animation: roselia-effort-stream calc(7s - var(--effort-progress) * 4s) linear infinite; animation-delay: calc(var(--particle-index) * -.47s); }
+.roselia-effort-particles i:nth-child(3n) { width: calc(1.5px + var(--effort-progress) * 1.2px); height: calc(1.5px + var(--effort-progress) * 1.2px); }
+.roselia-effort-range { position: absolute; z-index: 3; inset: 0; width: 100%; height: var(--effort-thumb-size); padding: 0; margin: 0; opacity: 0; appearance: none; background: transparent; cursor: ew-resize; touch-action: pan-y; }
+.roselia-effort-range::-webkit-slider-thumb { appearance: none; width: var(--effort-thumb-size); height: var(--effort-thumb-size); border-radius: 50%; corner-shape: round; }
+.roselia-effort-range::-moz-range-thumb { width: var(--effort-thumb-size); height: var(--effort-thumb-size); border: 0; border-radius: 50%; corner-shape: round; }
+.roselia-effort-scale:has(.roselia-effort-range:focus-visible) .roselia-effort-thumb { outline: 2px solid var(--roselia-accent); outline-offset: 3px; }
+.roselia-effort-scale:has(.roselia-effort-range:hover) .roselia-effort-thumb { box-shadow: 0 1px 5px #17102433, 0 0 14px #c4a5f24d; }
 .roselia-effort-scale[data-disabled] { opacity: .65; }
 .roselia-effort-range[aria-disabled='true'] { cursor: wait; }
 .roselia-effort-hint { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; border: 0; }
-.roselia-effort-error { margin: 12px 0 0; color: #ffcccc; font-size: 11px; overflow-wrap: anywhere; }
+.roselia-effort-error { margin: 10px 0 0; color: var(--dsw-alias-state-error-primary, #b55369); font-size: 11px; overflow-wrap: anywhere; }
+.roselia-model-picker { display: flex; flex-direction: column; min-height: 0; padding: 8px; }
+.roselia-model-picker-header { display: flex; align-items: center; justify-content: space-between; min-height: 24px; padding: 0 2px; margin-bottom: 8px; color: var(--roselia-muted); font-size: 12px; font-weight: 500; }
+.roselia-model-picker-header .roselia-model-back { width: 22px; height: 22px; padding: 2px; }
+.roselia-model-list { min-height: 0; max-height: min(264px, calc(100dvh - 180px)); overflow-y: auto; overscroll-behavior: contain; }
+.roselia-model-group + .roselia-model-group { margin-top: 10px; }
+.roselia-model-group-title { padding: 3px 2px 6px; margin: 0; color: var(--roselia-muted); font-size: 11px; font-weight: 500; line-height: 16px; }
+.roselia-model-option { display: flex; align-items: center; gap: 8px; width: 100%; min-height: 29px; padding: 4px 2px; border: 0; border-radius: 6px; color: var(--roselia-ink); background: transparent; text-align: left; font-size: 13px; line-height: 21px; cursor: pointer; }
+.roselia-model-option:hover { background: color-mix(in srgb, var(--roselia-accent) 10%, transparent); }
+.roselia-effort-popover .roselia-model-option:focus-visible { outline-offset: -2px; }
+.roselia-model-option[aria-disabled='true'], .roselia-model-option:disabled { opacity: .5; cursor: wait; }
+.roselia-model-option-name { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.roselia-model-option-check { display: grid; place-items: center; flex: none; width: 18px; height: 20px; color: var(--roselia-muted); font-size: 16px; }
+.roselia-model-empty, .roselia-model-notice { padding: 8px 4px; margin: 0; color: var(--roselia-muted); font-size: 11px; line-height: 18px; overflow-wrap: anywhere; }
+.roselia-model-retry { padding: 3px 6px; border: 0; border-radius: 5px; color: var(--roselia-accent); background: transparent; font-size: 11px; cursor: pointer; }
+.roselia-model-retry:hover { background: color-mix(in srgb, var(--roselia-accent) 10%, transparent); }
 @keyframes roselia-effort-reveal { from { opacity: 0; transform: translateY(4px) scale(.98); } to { opacity: 1; transform: none; } }
-@keyframes roselia-effort-stream { 0% { opacity: 0; transform: translateX(-16px); } 25%, 70% { opacity: .75; } 100% { opacity: 0; transform: translateX(32px); } }
-@media (max-width: 680px) { .roselia-effort-trigger-label { display: none; } }
-@media (max-width: 420px) { .roselia-effort-trigger { padding-inline: 4px; gap: 3px; } .roselia-effort-popover { padding-inline: 18px; } }
+@keyframes roselia-effort-stream { 0% { opacity: 0; transform: translate(-10px, 2px) scale(.65); } 25%, 70% { opacity: calc(.35 + var(--effort-progress) * .55); } 100% { opacity: 0; transform: translate(calc(16px + var(--effort-progress) * 16px), -2px) scale(1); } }
+@keyframes roselia-effort-shimmer { 0%, 18% { transform: translateX(-100%); } 75%, 100% { transform: translateX(100%); } }
+@media (max-width: 420px) { .roselia-effort-trigger { padding-inline: 4px; gap: 4px; max-width: min(240px, 48cqw); } }
 @media (prefers-reduced-motion: reduce) {
-  .roselia-effort-trigger, .roselia-effort-value, .roselia-effort-fill, .roselia-effort-thumb { transition: none; }
-  .roselia-effort-popover, .roselia-effort-particles i { animation: none; }
-  .roselia-effort-particles { display: none; }
+  .roselia-effort-trigger, .roselia-effort-trigger svg, .roselia-effort-value, .roselia-effort-fill, .roselia-effort-thumb { transition: none; }
+  .roselia-effort-popover, .roselia-effort-particles i, .roselia-effort-fill::before { animation: none; }
+  .roselia-effort-particles, .roselia-effort-fill::before { display: none; }
 }
 @media (forced-colors: active) {
   .roselia-effort-popover { color: CanvasText; background: Canvas; border-color: CanvasText; box-shadow: none; }
-  .roselia-effort-trigger, .roselia-effort-trigger-value, .roselia-effort-value, .roselia-effort-model, .roselia-effort-reset, .roselia-effort-error, .roselia-effort-emblem { color: CanvasText; }
+  .roselia-effort-trigger, .roselia-effort-trigger-value, .roselia-effort-value, .roselia-effort-model, .roselia-effort-reset, .roselia-effort-error, .roselia-model-option, .roselia-model-back, .roselia-model-group-title, .roselia-model-empty, .roselia-model-notice, .roselia-model-retry { color: CanvasText; }
+  .roselia-model-option[aria-selected='true'] { color: HighlightText; background: Highlight; }
   .roselia-effort-trigger svg { color: Highlight; }
   .roselia-effort-track { display: none; }
   .roselia-effort-range { opacity: 1; appearance: auto; accent-color: Highlight; }

@@ -6,7 +6,7 @@ import { access, lstat, mkdir, realpath, stat, writeFile } from 'node:fs/promise
 import { dirname, isAbsolute, relative, resolve, sep } from 'node:path'
 import { fileURLToPath } from 'node:url'
 
-const HELP = `Roselia — Nocturne 本地只读预览（仅 macOS）
+const HELP = `Roselia 主题本地只读预览（仅 macOS）
 
 用法：npm run preview -- [--dsh <官方源码目录>] [--port <0-65535>]
 

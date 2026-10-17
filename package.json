@@ -1,7 +1,7 @@
 {
   "name": "dsh-display-roselia",
-  "version": "0.2.0",
-  "description": "Roselia — Nocturne: random member stages and an on-demand animated reasoning popover for DSH.",
+  "version": "0.2.1",
+  "description": "Roselia 主题：随机成员舞台、统一模型与推理强度入口，以及 DSH 明暗配色。",
   "private": true,
   "type": "module",
   "license": "UNLICENSED",

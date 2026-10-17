@@ -1,5 +1,5 @@
 /**
- * Host face for the Roselia — Nocturne browser plugin.
+ * Host face for the Roselia theme browser plugin.
  *
  * DSH discovers the browser entry through package.json's dsh.client field.
  * A Host Config would not automatically reach the browser: the first release

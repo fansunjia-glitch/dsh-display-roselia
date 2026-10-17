@@ -9,7 +9,7 @@ on:
       tag:
         description: 'Existing release tag, matching package.json version'
         required: true
-        default: 'v0.2.0'
+        default: 'v0.2.1'
         type: string
 
 permissions: {}
@@ -104,7 +104,7 @@ jobs:
           const { GH_REPO, RELEASE_TAG, PACKAGE_FILENAME, RUNNER_TEMP } = process.env
           const base = `https://github.com/${GH_REPO}/blob/${encodeURIComponent(RELEASE_TAG)}`
           const notes = [
-            'Roselia · Nocturne / 夜曲：随机成员舞台与按需推理浮层。',
+            'Roselia 主题：随机成员舞台与按需推理浮层。',
             '',
             '下载 `' + PACKAGE_FILENAME + '` 与 `SHA256SUMS`，在同一目录校验后通过官方 CLI 安装（示例 profile 为 web）：',
             '',
@@ -127,7 +127,7 @@ jobs:
           if ! gh release view "$RELEASE_TAG" --repo "$GH_REPO" --json isDraft,url > "$metadata"; then
             # Upload while still a draft, before optional release immutability applies.
             gh release create "$RELEASE_TAG" --repo "$GH_REPO" --verify-tag --draft \
-              --title "Roselia · 夜曲 $RELEASE_TAG" --notes-file "$RUNNER_TEMP/release-notes.md"
+              --title "Roselia 主题 $RELEASE_TAG" --notes-file "$RUNNER_TEMP/release-notes.md"
             gh release view "$RELEASE_TAG" --repo "$GH_REPO" --json isDraft,url > "$metadata"
           fi
 

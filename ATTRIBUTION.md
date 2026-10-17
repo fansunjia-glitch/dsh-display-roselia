@@ -1,6 +1,6 @@
 # 素材与设计出处
 
-本插件主题明确为 **BanG Dream! Roselia**。这是个人制作的非官方界面主题，与 BanG Dream! 官方无隶属或背书关系。
+**Roselia 主题**以 **BanG Dream! Roselia** 为主题。这是个人制作的非官方界面主题，与 BanG Dream! 官方无隶属或背书关系。
 
 ## 官方素材
 

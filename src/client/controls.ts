@@ -33,7 +33,7 @@ export function installControls(onChange: (value: Preferences) => void): () => v
   cover.append(coverLogo, close)
   const body = element('div', 'roselia-dialog-body')
   body.append(element('p', 'roselia-eyebrow', 'BANG DREAM!  /  PERSONAL THEME'))
-  const title = element('h2', 'roselia-dialog-title', 'Nocturne · 夜曲')
+  const title = element('h2', 'roselia-dialog-title', 'Roselia 主题')
   title.id = 'roselia-dialog-title'
   body.append(title, element('p', 'roselia-description', '五人的舞台，每一次相遇都是新的序曲。'))
 
@@ -42,7 +42,7 @@ export function installControls(onChange: (value: Preferences) => void): () => v
   const sceneGrid = element('div', 'roselia-scene-grid')
   const scenes: { id: Scene; name: string; caption: string }[] = [
     { id: 'stage', name: '成员舞台', caption: 'Roselia · 此刻的主角' },
-    { id: 'nocturne', name: '夜曲', caption: '月光 · 蓝玫瑰' },
+    { id: 'nocturne', name: '月夜', caption: '月光 · 蓝玫瑰' },
     { id: 'live', name: '演出', caption: '五人的舞台' },
     { id: 'quiet', name: '纯净', caption: '只保留主题配色' },
   ]
