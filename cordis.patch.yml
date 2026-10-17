@@ -1,0 +1,4 @@
+# An independent row; no built-in plugin configuration is overwritten.
+- insert:
+    - id: display-roselia-nocturne
+      name: dsh-display-roselia

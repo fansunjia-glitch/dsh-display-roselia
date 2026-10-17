@@ -1,0 +1,68 @@
+/* A compact official composer control; only its open chooser owns a slider. */
+.roselia-effort-trigger {
+  display: inline-flex; align-items: center; gap: 5px; flex: none;
+  min-height: 30px; padding: 3px 8px; border: 1px solid transparent; border-radius: 9px;
+  color: var(--roselia-muted); background: transparent; cursor: pointer;
+  font: 11px/1.25 var(--dsw-font-family, system-ui, sans-serif); white-space: nowrap;
+  transition: color .18s, background .18s;
+}
+.roselia-effort-trigger svg { width: 15px; height: 15px; color: var(--roselia-accent); }
+.roselia-effort-trigger-value { color: var(--roselia-accent); font-weight: 500; }
+.roselia-effort-trigger:hover, .roselia-effort-trigger[aria-expanded='true'] { background: color-mix(in srgb, var(--roselia-accent) 12%, transparent); color: var(--roselia-ink); }
+.roselia-effort-trigger:focus-visible { outline: 2px solid var(--roselia-accent); outline-offset: 2px; }
+.roselia-effort-popover {
+  position: fixed; inset: auto; z-index: 1000; margin: 0; box-sizing: border-box;
+  width: min(380px, calc(100vw - 24px)); max-height: calc(100dvh - 24px); overflow: auto;
+  padding: 19px 23px 20px; border: 1px solid #ffffff16; border-radius: 24px; corner-shape: round;
+  color: #e9e8f4; background: #242330;
+  box-shadow: 0 12px 48px #0a071b66, 0 2px 8px #0002;
+  font: 12px/1.35 var(--dsw-font-family, system-ui, sans-serif);
+  animation: roselia-effort-reveal .16s ease-out;
+}
+.roselia-effort-popover::backdrop { background: transparent; }
+.roselia-effort-heading { display: grid; grid-template-columns: 36px minmax(0, 1fr) 36px; align-items: center; gap: 8px; min-height: 48px; }
+.roselia-effort-emblem { display: grid; place-items: center; color: #e2e2ec; }
+.roselia-effort-emblem svg { width: 28px; height: 28px; }
+.roselia-effort-caption { min-width: 0; text-align: center; }
+.roselia-effort-value { font-size: 23px; font-weight: 600; line-height: 1.2; color: hsl(var(--effort-hue) 85% 76%); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; transition: color .25s ease; }
+.roselia-effort-model { margin-top: 3px; color: #e1dfe9; font-size: 13px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.roselia-effort-reset { display: grid; place-items: center; width: 34px; height: 34px; padding: 6px; border: 0; border-radius: 10px; color: #dfdce9; background: transparent; cursor: pointer; }
+.roselia-effort-reset svg { width: 21px; height: 21px; }
+.roselia-effort-reset:hover { background: #ffffff0d; }
+.roselia-effort-reset:focus-visible { outline: 2px solid #d9bbff; outline-offset: 1px; }
+.roselia-effort-reset[aria-disabled='true'] { opacity: .4; cursor: default; }
+.roselia-effort-scale { position: relative; height: 46px; margin-top: 19px; }
+.roselia-effort-track { position: absolute; inset: 5px 0; height: 36px; border-radius: 999px; corner-shape: round; background: #494956; box-shadow: inset 0 1px 2px #0002; }
+.roselia-effort-fill { position: absolute; inset: 0 auto 0 0; width: calc(23px + var(--effort-progress) * (100% - 46px)); border-radius: inherit; corner-shape: round; background: radial-gradient(ellipse at 68% 50%, #e4c9ff55, transparent 65%), linear-gradient(90deg, #5865e8 0%, #c39aff 55%, #7950cc 100%); filter: saturate(calc(.8 + var(--effort-progress) * .3)); transition: width .24s cubic-bezier(.2,.8,.2,1), filter .25s; }
+.roselia-effort-thumb { position: absolute; z-index: 2; top: 50%; left: calc(23px + var(--effort-progress) * (100% - 46px)); width: 46px; height: 46px; box-sizing: border-box; border: 1px solid #ffffffee; border-radius: 50%; corner-shape: round; background: #fff; box-shadow: 0 1px 5px #1710243b, 0 0 14px #dfceff14; transform: translate(-50%, -50%); transition: left .24s cubic-bezier(.2,.8,.2,1), box-shadow .2s; }
+.roselia-effort-particles { position: absolute; inset: 0; overflow: hidden; border-radius: inherit; corner-shape: round; }
+.roselia-effort-particles i { position: absolute; left: calc(var(--particle-index) * 8.4%); width: 2px; height: 2px; border-radius: 50%; corner-shape: round; background: #f5eaff; box-shadow: 0 0 5px #f1e3ff88; animation: roselia-effort-stream calc(4.8s - var(--effort-progress) * 1.2s) linear infinite; animation-delay: calc(var(--particle-index) * -.39s); }
+.roselia-effort-particles i:nth-child(3n) { width: 3px; height: 3px; }
+.roselia-effort-particles i:nth-child(3n + 1) { width: 1.5px; height: 1.5px; }
+.roselia-effort-range { position: absolute; z-index: 3; inset: 0; width: 100%; height: 46px; padding: 0; margin: 0; opacity: 0; appearance: none; background: transparent; cursor: ew-resize; touch-action: pan-y; }
+.roselia-effort-range::-webkit-slider-thumb { appearance: none; width: 46px; height: 46px; border-radius: 50%; corner-shape: round; }
+.roselia-effort-range::-moz-range-thumb { width: 46px; height: 46px; border: 0; border-radius: 50%; corner-shape: round; }
+.roselia-effort-scale:has(.roselia-effort-range:focus-visible) .roselia-effort-thumb { outline: 2px solid #d6bbff; outline-offset: 4px; }
+.roselia-effort-scale:has(.roselia-effort-range:hover) .roselia-effort-thumb { box-shadow: 0 1px 5px #1710243b, 0 0 18px #dfceff60; }
+.roselia-effort-scale[data-disabled] { opacity: .65; }
+.roselia-effort-range[aria-disabled='true'] { cursor: wait; }
+.roselia-effort-hint { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; border: 0; }
+.roselia-effort-error { margin: 12px 0 0; color: #ffcccc; font-size: 11px; overflow-wrap: anywhere; }
+@keyframes roselia-effort-reveal { from { opacity: 0; transform: translateY(4px) scale(.98); } to { opacity: 1; transform: none; } }
+@keyframes roselia-effort-stream { 0% { opacity: 0; transform: translateX(-16px); } 25%, 70% { opacity: .75; } 100% { opacity: 0; transform: translateX(32px); } }
+@media (max-width: 680px) { .roselia-effort-trigger-label { display: none; } }
+@media (max-width: 420px) { .roselia-effort-trigger { padding-inline: 4px; gap: 3px; } .roselia-effort-popover { padding-inline: 18px; } }
+@media (prefers-reduced-motion: reduce) {
+  .roselia-effort-trigger, .roselia-effort-value, .roselia-effort-fill, .roselia-effort-thumb { transition: none; }
+  .roselia-effort-popover, .roselia-effort-particles i { animation: none; }
+  .roselia-effort-particles { display: none; }
+}
+@media (forced-colors: active) {
+  .roselia-effort-popover { color: CanvasText; background: Canvas; border-color: CanvasText; box-shadow: none; }
+  .roselia-effort-trigger, .roselia-effort-trigger-value, .roselia-effort-value, .roselia-effort-model, .roselia-effort-reset, .roselia-effort-error, .roselia-effort-emblem { color: CanvasText; }
+  .roselia-effort-trigger svg { color: Highlight; }
+  .roselia-effort-track { display: none; }
+  .roselia-effort-range { opacity: 1; appearance: auto; accent-color: Highlight; }
+  .roselia-effort-range::-webkit-slider-thumb { appearance: auto; }
+  .roselia-effort-range:focus-visible { outline: 2px solid Highlight; outline-offset: 2px; }
+}

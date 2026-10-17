@@ -1,0 +1,75 @@
+{
+  "name": "dsh-display-roselia",
+  "version": "0.2.0",
+  "description": "Roselia — Nocturne: random member stages and an on-demand animated reasoning popover for DSH.",
+  "private": true,
+  "type": "module",
+  "license": "UNLICENSED",
+  "icon": "./assets/official/roselia-logo.png",
+  "main": "./lib/index.js",
+  "exports": {
+    ".": "./lib/index.js",
+    "./client": "./lib/client.js",
+    "./package.json": "./package.json",
+    "./locale/*.json": "./locale/*.json"
+  },
+  "files": [
+    "lib/",
+    "src/",
+    "tests/",
+    "scripts/build.mjs",
+    "scripts/preview.mjs",
+    "tsconfig.json",
+    "assets/",
+    "locale/",
+    "cordis.patch.yml",
+    "README.md",
+    "ATTRIBUTION.md",
+    "VERIFICATION.md",
+    "screenshots/"
+  ],
+  "engines": {
+    "node": ">=22",
+    "dsh": "0.2.1-rc.2"
+  },
+  "dsh": {
+    "bundle": {
+      "patch": "./cordis.patch.yml"
+    },
+    "client": {
+      "platform": "web",
+      "inject": [
+        "@deepseek-ai/dsh-client-ui-theme",
+        "@deepseek-ai/dsh-client-ui-renderer",
+        "@deepseek-ai/dsh-client-ui-sidebar",
+        "@deepseek-ai/dsh-client-ui-conversation",
+        "@deepseek-ai/dsh-client-ui-model-selection"
+      ]
+    }
+  },
+  "scripts": {
+    "build": "node ./scripts/build.mjs",
+    "preview": "node ./scripts/preview.mjs",
+    "prepack": "npm run build",
+    "typecheck": "tsc --noEmit",
+    "test": "npm run build && node --test tests/*.test.mjs"
+  },
+  "devDependencies": {
+    "esbuild": "0.28.2",
+    "lightningcss": "1.33.0",
+    "react": "18.3.1",
+    "react-dom": "18.3.1",
+    "@types/react": "18.3.31",
+    "@types/react-dom": "18.3.7",
+    "typescript": "5.9.3",
+    "jsdom": "27.4.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/fansunjia-glitch/dsh-display-roselia.git"
+  },
+  "homepage": "https://github.com/fansunjia-glitch/dsh-display-roselia#readme",
+  "bugs": {
+    "url": "https://github.com/fansunjia-glitch/dsh-display-roselia/issues"
+  }
+}

@@ -1,0 +1,12 @@
+node_modules/
+.npm-cache/
+*.tgz
+.DS_Store
+.preview/
+.preview-home/
+.runtime/
+
+# Local secrets and editor state
+.env
+.env.*
+!.env.example

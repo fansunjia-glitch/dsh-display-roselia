@@ -1,0 +1,193 @@
+/* Only public slot/data attributes and plugin-owned classes; no generated DSH class names. */
+body[data-roselia-display] {
+  --roselia-paper: #f8f5fd;
+  --roselia-ink: #30243f;
+  --roselia-muted: #766689;
+  --roselia-line: #7654962b;
+  --roselia-accent: #7050a8;
+  --roselia-surface: #fffdfd;
+  --roselia-wash: #f6f2fbe8;
+  --roselia-active-wash: #f5f3faf7;
+  --roselia-portrait-wash: #e6dcf3;
+  --roselia-scene-image: url('ROSELIA_WALLPAPER');
+}
+body[data-roselia-display][data-ds-dark-theme] {
+  --roselia-paper: #171a2c;
+  --roselia-ink: #ece6fa;
+  --roselia-muted: #b0a3c9;
+  --roselia-line: #bba2ed30;
+  --roselia-accent: #c4a5f2;
+  --roselia-surface: #22253b;
+  --roselia-wash: #10121f54;
+  --roselia-active-wash: #10121fe8;
+  --roselia-portrait-wash: #34304e;
+}
+body[data-roselia-display][data-roselia-scene='live'] { --roselia-scene-image: url('ROSELIA_LIVE'); }
+body[data-roselia-display][data-roselia-scene='stage'] { --roselia-scene-image: none; }
+body[data-roselia-display] [data-slot='sidebar'] > div {
+  background-image: linear-gradient(180deg, transparent 55%, #7661a21b);
+  box-shadow: inset -1px 0 var(--roselia-line);
+}
+body[data-roselia-display] [data-conversation-content] {
+  position: relative;
+  isolation: isolate;
+  background-color: var(--dsw-alias-bg-base);
+}
+body[data-roselia-display] [data-conversation-content]::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: -2;
+  pointer-events: none;
+  background: linear-gradient(var(--roselia-active-wash), var(--roselia-active-wash)), var(--roselia-scene-image) center / cover;
+  opacity: var(--roselia-strength, .65);
+}
+body[data-roselia-display] [data-content-phase='hero']::before {
+  background-image: linear-gradient(100deg, var(--roselia-wash) 15%, var(--roselia-wash) 45%, transparent 120%), var(--roselia-scene-image);
+}
+body[data-roselia-display] [data-conversation-content]::after {
+  content: '';
+  position: absolute;
+  width: min(48%, 520px);
+  height: min(30%, 250px);
+  right: 12px;
+  bottom: 0;
+  background: var(--roselia-member-image) center / cover no-repeat;
+  mask-image: linear-gradient(90deg, transparent, black 24%, black 80%, transparent), linear-gradient(0deg, black 55%, transparent);
+  mask-composite: intersect;
+  opacity: calc(var(--roselia-strength, .65) * .14);
+  pointer-events: none;
+  z-index: -1;
+}
+body[data-roselia-display] [data-content-phase='hero']::after { opacity: calc(var(--roselia-strength, .65) * .95); }
+body[data-roselia-display]:not([data-roselia-member='all']) [data-conversation-content]::after {
+  height: min(58%, 430px);
+  width: min(40%, 350px);
+  background-size: contain;
+  background-position: bottom;
+  mask-image: linear-gradient(0deg, transparent 0%, black 25%);
+}
+body[data-roselia-display][data-roselia-scene='live'] [data-content-phase='hero']::before {
+  background-image: linear-gradient(var(--roselia-wash), var(--roselia-wash)), var(--roselia-scene-image);
+}
+/* Official character art is the main composition. The stage stays quiet behind text. */
+body[data-roselia-display][data-roselia-scene='stage'] [data-conversation-content]::before {
+  background: radial-gradient(ellipse at 88% 42%, #9494d01a, transparent 58%);
+  opacity: 1;
+}
+body[data-roselia-display][data-roselia-scene='stage'] [data-content-phase='hero']::after {
+  width: min(70%, 850px);
+  height: 98%;
+  right: -11%;
+  bottom: -6%;
+  background-size: auto 100%;
+  background-position: left bottom;
+  mask-image: linear-gradient(0deg, transparent, black 16%, black 94%, transparent);
+  opacity: calc(.4 + var(--roselia-strength, .75) * .6);
+  filter: drop-shadow(-18px 12px 40px #1b17391a);
+  animation: roselia-stage-arrive .65s cubic-bezier(.2,.7,.25,1) both;
+}
+body[data-roselia-display][data-roselia-scene='stage'][data-roselia-member='all'] [data-content-phase='hero']::after {
+  width: 100%; height: 100%; right: 0; bottom: 0;
+  background-size: cover; background-position: 58% center;
+  mask-image: linear-gradient(90deg, transparent 4%, #0005 35%, black 85%);
+  opacity: calc(var(--roselia-strength, .75) * .8);
+}
+body[data-roselia-display][data-roselia-scene='stage'] [data-content-phase='active']::after { opacity: .055; }
+.roselia-hero-mark { display: inline-flex; align-items: center; justify-content: center; flex: none; }
+@keyframes roselia-stage-arrive { from { opacity: 0; transform: translateX(14px); } to { transform: translateX(0); } }
+body[data-roselia-display][data-roselia-artwork='false'] [data-conversation-content]::after,
+body[data-roselia-display][data-roselia-scene='quiet'] [data-conversation-content]::before,
+body[data-roselia-display][data-roselia-scene='quiet'] [data-conversation-content]::after { display: none; }
+body[data-roselia-display] [data-composer-card] {
+  box-shadow: 0 0 0 .5px var(--roselia-line), 0 12px 42px #0a061918;
+}
+body[data-roselia-display] [data-composer-card]:focus-within {
+  box-shadow: 0 0 0 1px color-mix(in srgb, var(--roselia-accent) 50%, transparent), 0 12px 42px #38235a20;
+}
+body[data-roselia-display] [data-conversation-tabs] { box-shadow: inset 0 -1px var(--roselia-line); }
+.roselia-rose { flex: none; color: var(--roselia-accent); }
+.roselia-wordmark { display: inline-flex; align-items: center; width: 87px; height: 30px; vertical-align: middle; }
+.roselia-wordmark img { width: 87px; height: 30px; object-fit: contain; }
+.roselia-launcher {
+  position: fixed; right: 20px; bottom: 16px; z-index: 80;
+  display: flex; align-items: center; gap: 9px; min-height: 38px;
+  padding: 3px 13px 3px 5px; border: 0; border-radius: 999px; corner-shape: round;
+  color: var(--roselia-accent); background: var(--roselia-paper);
+  box-shadow: 0 0 0 .5px var(--roselia-line), 0 4px 24px #0b061c21;
+  cursor: pointer; transition: box-shadow .18s, transform .18s;
+}
+.roselia-launcher:hover { box-shadow: 0 0 0 1px var(--roselia-accent), 0 6px 24px #4e35672e; transform: translateY(-2px); }
+.roselia-launcher-monogram { font: italic 25px/28px Georgia, serif; width: 29px; }
+.roselia-launcher-label { font: 500 9px/1.2 Georgia, serif; letter-spacing: 2px; }
+.roselia-dialog {
+  padding: 0; width: min(440px, calc(100vw - 32px)); max-height: calc(100dvh - 40px);
+  border: 0; border-radius: 22px; color: var(--roselia-ink); background: var(--roselia-paper);
+  box-shadow: 0 0 0 1px var(--roselia-line), 0 30px 120px #0008; overflow: auto;
+  font-family: var(--dsw-font-family, system-ui, sans-serif);
+}
+.roselia-dialog::backdrop { background: #08071499; }
+.roselia-dialog-cover { height: 138px; position: relative; background-size: cover; background-position: center 42%; }
+.roselia-dialog-cover::before { content: ''; position: absolute; inset: 0; background: linear-gradient(90deg, #121021b3, #12102100), linear-gradient(0deg, var(--roselia-paper), transparent 55%); }
+.roselia-dialog-logo { position: absolute; width: 135px; height: 72px; object-fit: contain; left: 24px; bottom: 14px; filter: drop-shadow(0 3px 10px #10072980); }
+.roselia-close { position: absolute; right: 12px; top: 12px; width: 32px; height: 32px; padding: 0; border: 1px solid #ffffff40; border-radius: 50%; corner-shape: round; color: #fff; background: #141122a8; font: 25px/28px system-ui; cursor: pointer; }
+.roselia-dialog-body { padding: 4px 24px 22px; }
+.roselia-eyebrow { font: 500 9px/16px system-ui; letter-spacing: 2px; color: var(--roselia-muted); margin: 0 0 5px; }
+.roselia-dialog-title { font: 400 26px/1.4 Georgia, 'Songti SC', serif; margin: 0; letter-spacing: .5px; }
+.roselia-description { font-size: 12px; line-height: 1.8; color: var(--roselia-muted); margin: 5px 0 20px; }
+.roselia-fieldset { border: 0; padding: 0; margin: 0 0 20px; min-width: 0; }
+.roselia-label { font-size: 12px; font-weight: 600; line-height: 1.5; margin: 0 0 10px; padding: 0; }
+.roselia-scene-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 9px; }
+.roselia-scene { display: flex; flex-direction: column; gap: 4px; padding: 5px 5px 10px; overflow: hidden; border: 1px solid var(--roselia-line); border-radius: 11px; background: transparent; color: var(--roselia-muted); text-align: left; cursor: pointer; }
+.roselia-scene strong { color: var(--roselia-ink); font-size: 12px; font-weight: 500; padding-left: 4px; }
+.roselia-scene > span:last-child { font-size: 9px; line-height: 14px; padding-left: 4px; }
+.roselia-scene-art { display: block; height: 49px; width: 100%; margin-bottom: 4px; border-radius: 7px; background: linear-gradient(135deg,#d6ccec,#a99abd); }
+.roselia-scene-nocturne .roselia-scene-art { background: url('ROSELIA_WALLPAPER') 75% 70% / cover; }
+.roselia-scene-stage .roselia-scene-art { background: linear-gradient(90deg, #12132222, #12132200), url('ROSELIA_LIVE') 50% 30% / 170% auto; }
+.roselia-scene-live .roselia-scene-art { background: url('ROSELIA_LIVE') center / cover; }
+.roselia-scene-quiet .roselia-scene-art { background: linear-gradient(135deg, #252a43, #484063); }
+.roselia-scene[aria-pressed='true'] { border-color: var(--roselia-accent); background: color-mix(in srgb, var(--roselia-accent) 8%, transparent); box-shadow: 0 0 0 1px var(--roselia-accent); }
+.roselia-member-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 7px; }
+.roselia-member { border: 0; padding: 0; display: flex; flex-direction: column; align-items: center; gap: 7px; background: transparent; color: var(--roselia-muted); cursor: pointer; font: 10px/1.4 var(--dsw-font-family, system-ui); white-space: nowrap; }
+.roselia-portrait { width: 44px; height: 44px; border-radius: 50%; corner-shape: round; overflow: hidden; background: var(--roselia-portrait-wash); box-shadow: 0 0 0 1px var(--roselia-line); }
+.roselia-portrait img { width: 100%; height: 100%; object-fit: cover; object-position: 50% 0%; transform: scale(3.6); transform-origin: 50% 15%; }
+.roselia-member[data-member='all'] img { height: 100%; transform: none; }
+.roselia-shuffle { display: grid; place-items: center; font: 30px/1 Georgia, serif; color: var(--roselia-accent); background: linear-gradient(135deg, var(--roselia-portrait-wash), var(--roselia-paper)); }
+.roselia-member-hint { margin: 12px 0 0; color: var(--roselia-muted); font-size: 10px; line-height: 1.6; }
+.roselia-member[aria-pressed='true'] .roselia-portrait { box-shadow: 0 0 0 2px var(--roselia-paper), 0 0 0 3px var(--roselia-accent); }
+.roselia-member[aria-pressed='true'] { color: var(--roselia-accent); }
+.roselia-range-label { display: flex; flex-wrap: wrap; justify-content: space-between; font-size: 12px; line-height: 20px; font-weight: 500; }
+.roselia-range-label output { color: var(--roselia-muted); font-size: 11px; font-weight: 400; }
+.roselia-range { width: 100%; height: 18px; margin: 11px 0 13px; accent-color: var(--roselia-accent); cursor: pointer; }
+.roselia-toggle { display: flex; align-items: center; justify-content: space-between; font-size: 12px; padding: 12px 0; border-top: 1px solid var(--roselia-line); }
+.roselia-toggle input { accent-color: var(--roselia-accent); width: 17px; height: 17px; }
+.roselia-hint { color: var(--roselia-muted); font-size: 10px; line-height: 1.7; margin: 3px 0 17px; }
+.roselia-dialog-footer { display: flex; align-items: center; justify-content: space-between; border-top: 1px solid var(--roselia-line); padding-top: 14px; }
+.roselia-reset { border: 0; background: transparent; color: var(--roselia-muted); padding: 0; font: inherit; font-size: 11px; cursor: pointer; }
+.roselia-source { color: var(--roselia-accent); text-decoration: none; font-size: 11px; }
+.roselia-status { color: var(--roselia-muted); font-size: 10px; line-height: 1.6; margin: 8px 0 0; }
+.roselia-status:empty { display: none; }
+.roselia-dialog :disabled { opacity: .45; cursor: default; }
+.roselia-dialog :focus-visible, .roselia-launcher:focus-visible { outline: 2px solid var(--roselia-accent); outline-offset: 4px; }
+@media (max-width: 700px) {
+  .roselia-launcher { right: 9px; bottom: 9px; padding: 3px 5px; }
+  .roselia-launcher-label { display: none; }
+  body[data-roselia-display] [data-conversation-content]::after { width: 70%; height: 22%; opacity: calc(var(--roselia-strength) * .2); }
+  body[data-roselia-display][data-roselia-scene='stage'] [data-content-phase='hero']::after {
+    width: 115%; height: 78%; right: -19%; top: 3%; bottom: auto;
+    background-position: center top;
+    opacity: calc(.4 + var(--roselia-strength, .75) * .4);
+  }
+  .roselia-scene-grid { grid-template-columns: repeat(2, 1fr); }
+  .roselia-member-grid { grid-template-columns: repeat(4, 1fr); row-gap: 15px; }
+}
+@media (max-height: 600px) { .roselia-dialog-cover { height: 95px; } }
+@media (prefers-reduced-motion: reduce) {
+  .roselia-launcher { transition: none; }
+  .roselia-launcher:hover { transform: none; }
+  body[data-roselia-display] [data-conversation-content]::after { animation: none !important; }
+}
+@media (forced-colors: active) {
+  body[data-roselia-display] [data-conversation-content]::before, body[data-roselia-display] [data-conversation-content]::after { display: none; }
+  .roselia-launcher, .roselia-dialog, .roselia-scene { border: 1px solid ButtonText; }
+}
