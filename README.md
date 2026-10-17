@@ -54,7 +54,33 @@ npm run preview -- --dsh /path/to/dsh --port 0
 
 ## 安装进自己的 DSH
 
-从 [GitHub Releases](https://github.com/fansunjia-glitch/dsh-display-roselia/releases) 下载预构建的 `dsh-display-roselia-0.2.1.tgz`，或按上面的命令克隆并构建源码。
+### 从 GitHub 仓库安装
+
+DSH 官方支持直接从 Git 仓库安装组合包。在 **插件 → 添加插件** 中输入仓库地址，安装完成后选择 **立即启用**：
+
+```text
+https://github.com/fansunjia-glitch/dsh-display-roselia
+```
+
+也可以输入 `github:fansunjia-glitch/dsh-display-roselia`。为了让分享者与使用者拿到相同代码，官方建议在来源后加完整提交 SHA；以下指向本仓库 `0.2.1` 的代码：
+
+```text
+github:fansunjia-glitch/dsh-display-roselia#5431fdc9ed3a7467f3652fa95e6fd2412b124026
+```
+
+普通 Web CLI 的等价命令如下；将 `web` 替换为管理目标实例的实际 profile 名称：
+
+```sh
+dsh plugin --profile web add github:fansunjia-glitch/dsh-display-roselia#5431fdc9ed3a7467f3652fa95e6fd2412b124026
+```
+
+**验证状态：官方支持上述来源形式；本插件尚未完成真实 Git 安装验收。** 当前已验证的是下文的本地目录链接安装。仓库已提交 `lib/` 构建产物，入口指向这些文件；不会把“已包含构建产物”等同于“整个安装链路已经验证”。
+
+Git 安装由 DSH 的插件管理器调用 pnpm 完成，再按 `dsh.bundle` 注册组合包。GitHub Release 和 Actions 不是这条路径的前提。仅提交 TypeScript 源码的包需要提供自包含的 `prepare` 构建；pnpm 阻止构建脚本时，用户需核对待授权包后按官方提示允许并重试。本仓库当前没有 `prepare`，保留预构建文件的分发方式。
+
+### 本地目录链接安装（已验证）
+
+按上面的开发命令克隆并构建源码，然后链接进自己的 DSH。
 
 对于普通 CLI / Web / PWA，使用管理该实例的 `dsh` CLI，将下面的 `你的profile名称` 替换为实际名称：
 
@@ -67,7 +93,9 @@ dsh --profile 你的profile名称
 
 若使用真正的 **Electron Desktop 应用**，应先启动一次应用完成初始化，再完全退出，使用 **Desktop 自带的 CLI** 对 `--profile desktop` 执行安装；普通 npm CLI 不能修改 Desktop 受管 profile。不要把浏览器 PWA 与 Electron Desktop 混为一谈。
 
-推荐直接安装 Release 中预构建的 tarball，无需授权运行安装构建脚本：
+### 预构建压缩包与卸载
+
+作者也可以运行 `npm pack`，把生成的 `.tgz` 文件直接交给使用者，无需设置 GitHub Release 自动流程。已有 [v0.2.1 历史安装包](https://github.com/fansunjia-glitch/dsh-display-roselia/releases/tag/v0.2.1)仍可下载。安装预构建 tarball 无需为本插件授权安装时构建：
 
 ```sh
 dsh plugin --profile 你的profile名称 add /absolute/path/to/dsh-display-roselia-0.2.1.tgz
@@ -110,6 +138,21 @@ npm pack --pack-destination release
 
 验证范围与截图见 [VERIFICATION.md](VERIFICATION.md)。开发原则：**独立构建插件，官方 DSH 仓库只读；通过官方 bundle、profile、主题服务和插槽接入。**
 
-## 发布流程
+## 官方分享方式
 
-仓库的 `Release plugin` 工作流可在 Actions 中手动选择已有版本标签运行；后续推送 `v*` 标签也会触发。它从标签检出源码，执行类型检查、测试与打包，再将预构建 `.tgz` 和 `SHA256SUMS` 上传到对应 GitHub Release。运行不依赖本机 DSH checkout，也不需要个人访问令牌。
+仓库已移除 `Release plugin` 自动发布工作流。个人插件通过独立组合包复用；接收者由自己的 DSH 管理安装与 profile，作者无需分发本机 profile 或修改官方源码。
+
+| 方式 | 使用方式 | 本插件状态 |
+| --- | --- | --- |
+| Git 仓库 | 分享仓库 URL 或带完整提交 SHA 的 Git spec | 已公开源码与 `lib/`；真实 Git 安装待验收 |
+| 本地目录 | 克隆、构建后，通过官方 CLI 链接安装 | 已验证 |
+| 预构建 tarball | 手动打包并分享 `.tgz`，通过官方 CLI 安装 | 已有 0.2.1 历史安装包 |
+| npm 注册表 | 发布预构建 npm 包，使用包名与版本安装 | 未采用；当前 `private: true` 阻止 npm 发布 |
+
+多个个人插件还可以通过官方实验性的 **自定义插件市场** 展示：作者提供静态 HTTPS JSON 索引；使用者开启该功能后，在「发现」添加索引地址。Git 版本在索引中记录仓库 URL、完整提交 SHA 和可选子目录，最终仍走同一插件安装机制。DSH 不内置任何市场索引源；本仓库尚未创建个人市场。
+
+依据为 DSH `0.2.1-rc.2`、提交 `687f282e8625c6b8d11ff58211a90524be2e4317` 的官方资料：
+
+- [打包与安装插件](https://github.com/deepseek-ai/deepseek-harness/blob/687f282e8625c6b8d11ff58211a90524be2e4317/docs/user/develop/basic/publish.zh.md)
+- [插件管理器与添加插件界面](https://github.com/deepseek-ai/deepseek-harness/blob/687f282e8625c6b8d11ff58211a90524be2e4317/packages/client/ui-plugin-manager/README.zh.md)
+- [自定义插件市场](https://github.com/deepseek-ai/deepseek-harness/blob/687f282e8625c6b8d11ff58211a90524be2e4317/docs/user/guide/plugin-market.zh.md)
