@@ -103,3 +103,7 @@ npm pack --pack-destination release
 ```
 
 验证范围与截图见 [VERIFICATION.md](VERIFICATION.md)。开发原则：**独立构建插件，官方 DSH 仓库只读；通过官方 bundle、profile、主题服务和插槽接入。**
+
+## 发布流程
+
+仓库的 `Release plugin` 工作流可在 Actions 中手动选择已有版本标签运行；后续推送 `v*` 标签也会触发。它从标签检出源码，执行类型检查、测试与打包，再将预构建 `.tgz` 和 `SHA256SUMS` 上传到对应 GitHub Release。运行不依赖本机 DSH checkout，也不需要个人访问令牌。
